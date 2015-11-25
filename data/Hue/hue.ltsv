@@ -1,0 +1,10 @@
+# -*- coding: utf-8 -*-
+title:Hue		url:https://linda-server.herokuapp.com/masuilab
+ title:電気をつける	url:./data/Hue/LightOn.html
+ title:赤	url:./data/Hue/LightOnRed.html
+ title:黄	url:./data/Hue/LightOnYellow.html
+ title:緑	url:./data/Hue/LightOnGreen.html
+ title:青	url:./data/Hue/LightOnBlue.html
+ title:ピンク	url:./data/Hue/LightOnPink.html
+ title:カラーループ	url:./data/Hue/LightOnCl.html
+ title:電気を消す	url:./data/Hue/LightOff.html

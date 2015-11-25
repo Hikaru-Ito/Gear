@@ -2,7 +2,7 @@
 # gear.js = 「超」ナビゲーション
 #
 # node-webkit / ブラウザでも動く
-# 
+#
 # http://GitHub.com/masui/Gear
 #
 
@@ -15,8 +15,8 @@ singleWindow =       false       unless singleWindow?        # メニューと�
 json =               'data.json' unless json?
 
 # sayコマンドで読みあげる
-useAudio =           false       unless useAudio?            # 項目を発声するかどうか
-sayCGI =  "http://localhost/~masui/say.cgi" unless sayCGI?
+useAudio =           true       unless useAudio?            # 項目を発声するかどうか
+sayCGI =  "http://localhost:3000/say.cgi" unless sayCGI?
 
 node_app = (typeof(require) != 'undefined') # node-webkitによるアプリかどうか
 use_linda = (typeof(io) != 'undefined')     # Lindaを使うかどうか
@@ -41,6 +41,7 @@ hideTimeout = null
 
 typeCount = 0           # 連打したかどうか: 連打されてたら表示を行なう
 typeCountTimeout = null
+
 
 loadData = ->
   $.getJSON json, (data) ->
@@ -77,7 +78,7 @@ $ -> # document.ready()
   # 可能ならpaddle対応
   if use_linda
     setup_paddle()
- 
+
   loadData()
 
   if showContents
@@ -273,7 +274,7 @@ display = (newNodeList) -> # calc()で計算したリストを表示
         else # 即座に消す
           if oldnode.span != undefined
             oldnode.span.hide()
-  
+
     for i, newnode of nodeList # 新たに出現するエントリ
       if null == hashIndex oldNodeList, newnode
         parent = newnode.parent
@@ -297,7 +298,7 @@ display = (newNodeList) -> # calc()で計算したリストを表示
 move = (delta, shrinkMode) -> # 視点移動
   if typeCount <= 2
     clearTimeout typeCountTimeout
-    typeCount = Math.min typeCount+1, 2 
+    typeCount = Math.min typeCount+1, 2
     typeCountTimeout = setTimeout ->
       typeCount = 0
     , 1000
@@ -330,9 +331,9 @@ move = (delta, shrinkMode) -> # 視点移動
         newNodeList[i] = nodeList[i+delta]
         i -= 1
       display newNodeList
-      
+
   say nodeList[0] if useAudio
-  
+
   false
 
 #$(window).blur(function(){ // ????
@@ -408,14 +409,18 @@ setup_paddle = ->
     $.starttime = null
     $.moveTimeout = null  # move()をsetTimeout()で呼ぶ
     $.nexttime = null   # 次のmove()予定時刻
-    
-    ts.watch {type:"paddle"}, (err, tuple) ->
+
+    ###
+      3つのコントローラを同時接続する
+      GearFloor, GearChair, BlendMicro
+    ###
+    ts.watch {type:"GearFloor"}, (err, tuple) ->
       alert "Linda error" if err
       direction = tuple.data['direction']
       value = tuple.data['value']
       curtime = new Date()
       clearTimeout $.moveTimeout
-      if value < 10
+      if value < 80
         # ポンと押してすぐ離したときひとつぶんだけ移動してほしいので、
         # ひとつ先の位置をstep1に記録しておき、すぐ離した場合は
         # そこに移動するようにする。
@@ -427,7 +432,38 @@ setup_paddle = ->
         $.step1 = null
       else
         # このあたりのパラメタは結構重要
-        interval = 
+        interval =
+          if value > 1000 then 25
+          else if value > 800 then 50
+          else if value > 600 then 100
+          else if value > 400 then 200
+          else if value > 300 then 300
+          else if value > 200  then 400
+          else 500
+        if $.starttime == null
+          $.starttime = curtime
+          $.nexttime = $.starttime
+        fire $.nexttime-curtime, interval, movefunc(if direction == "left" then 1 else -1)
+
+    ts.watch {type:"GearChair"}, (err, tuple) ->
+      alert "Linda error" if err
+      direction = tuple.data['direction']
+      value = tuple.data['value']
+      curtime = new Date()
+      clearTimeout $.moveTimeout
+      if value < 80
+        # ポンと押してすぐ離したときひとつぶんだけ移動してほしいので、
+        # ひとつ先の位置をstep1に記録しておき、すぐ離した場合は
+        # そこに移動するようにする。
+        if curtime - $.starttime < 300 && $.step1 # 一瞬で離した場合は1ステップだけ動かす
+          refresh()
+          calc $.step1
+        $.starttime = null
+        $.nexttime = null
+        $.step1 = null
+      else
+        # このあたりのパラメタは結構重要
+        interval =
           if value > 500 then 25
           else if value > 400 then 50
           else if value > 300 then 100
@@ -439,6 +475,38 @@ setup_paddle = ->
           $.starttime = curtime
           $.nexttime = $.starttime
         fire $.nexttime-curtime, interval, movefunc(if direction == "left" then 1 else -1)
+
+    ts.watch {type:"BlendMicro"}, (err, tuple) ->
+      alert "Linda error" if err
+      direction = tuple.data['direction']
+      value = tuple.data['value']
+      curtime = new Date()
+      clearTimeout $.moveTimeout
+      if value < 50
+        # ポンと押してすぐ離したときひとつぶんだけ移動してほしいので、
+        # ひとつ先の位置をstep1に記録しておき、すぐ離した場合は
+        # そこに移動するようにする。
+        if curtime - $.starttime < 300 && $.step1 # 一瞬で離した場合は1ステップだけ動かす
+          refresh()
+          calc $.step1
+        $.starttime = null
+        $.nexttime = null
+        $.step1 = null
+      else
+        # このあたりのパラメタは結構重要
+        interval =
+          if value > 500 then 25
+          else if value > 400 then 50
+          else if value > 300 then 100
+          else if value > 200 then 200
+          else if value > 150 then 300
+          else if value > 80  then 400
+          else 500
+        if $.starttime == null
+          $.starttime = curtime
+          $.nexttime = $.starttime
+        fire $.nexttime-curtime, interval, movefunc(if direction == "left" then 1 else -1)
+
 
 # wait時間待った後でfuncを起動し、その後はintervalごとにfuncを起動
 fire = (wait, interval, func) ->

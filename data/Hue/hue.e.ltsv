@@ -1,0 +1,10 @@
+# -*- coding: utf-8 -*-
+title:Hue		url:https://linda-server.herokuapp.com/masuilab
+ title:HueTurnOn	url:../../Hue/LightOn.html
+ title:Red	url:../../Hue/LightOnRed.html
+ title:Yellow	url:../../Hue/LightOnYellow.html
+ title:Green	url:../../Hue/LightOnGreen.html
+ title:Blue		url:../../Hue/LightOnBlue.html
+ title:Pink		url:../../Hue/LightOnPink.html
+ title:カラーループ	url:../../Hue/LightOnCl.html
+ title:HueTurnOff	url:../../Hue/LightOff.html

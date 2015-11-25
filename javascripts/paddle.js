@@ -47,49 +47,48 @@ var movefunc = function(delta){
     menuwin.$.move(delta);
   };
 };
-
 //menuwin.focus();
 
-linda.io.on('connect', function(){
-  ts.watch({type:"paddle"}, function(err, tuple){
-    if(err) return;
-    console.log(tuple.data);
-    //menuwin.focus();
-    //menuwin.$.contentswin.focus();
-    menuwin.$.allfocus();
-
-    direction = tuple.data['direction'];
-    value = tuple.data['value'];
-    curtime = new Date();
-    clearTimeout(movetimer);
-    if(value < 10){
-      direction = 'None';
-      if(curtime - starttime < 300 && menuwin.$.step1){ // 1ステップだけ動かす
-        menuwin.$.refresh();
-        menuwin.$.calc(menuwin.$.step1);
-      }
-      starttime = null;
-      nexttime = null;
-      menuwin.$.step1 = null;
-      repcount = 0;
-    }
-    else {
-      // このあたりのパラメタは結構重要
-      var interval = 
-            value > 500 ? 25 :
-            value > 400 ? 50 :
-            value > 300 ? 100 :
-            value > 200 ? 200 :
-            value > 150 ? 300 :
-            value > 80 ? 400 : 400 ;
-      if(starttime == null){
-        starttime = curtime;
-        nexttime = starttime;
-      }
-      //console.log("nexttime = " + Number(nexttime) + ", curtime = " + Number(curtime));
-      //if(nexttime >= curtime){
-        fire(nexttime-curtime,interval,movefunc(direction == "left" ? 1 : -1));
-      //}
-    }
-  });
-});
+// linda.io.on('connect', function(){
+//   ts.watch({type:"gearchair"}, function(err, tuple){
+//     if(err) return;
+//     console.log(tuple.data);
+//     //menuwin.focus();
+//     //menuwin.$.contentswin.focus();
+//     menuwin.$.allfocus();
+//
+//     direction = tuple.data['direction'];
+//     value = tuple.data['value'];
+//     curtime = new Date();
+//     clearTimeout(movetimer);
+//     if(value < 10){
+//       direction = 'None';
+//       if(curtime - starttime < 300 && menuwin.$.step1){ // 1ステップだけ動かす
+//         menuwin.$.refresh();
+//         menuwin.$.calc(menuwin.$.step1);
+//       }
+//       starttime = null;
+//       nexttime = null;
+//       menuwin.$.step1 = null;
+//       repcount = 0;
+//     }
+//     else {
+//       // このあたりのパラメタは結構重要
+//       var interval =
+//             value > 500 ? 25 :
+//             value > 400 ? 50 :
+//             value > 300 ? 100 :
+//             value > 200 ? 200 :
+//             value > 150 ? 300 :
+//             value > 80 ? 400 : 400 ;
+//       if(starttime == null){
+//         starttime = curtime;
+//         nexttime = starttime;
+//       }
+//       //console.log("nexttime = " + Number(nexttime) + ", curtime = " + Number(curtime));
+//       //if(nexttime >= curtime){
+//         fire(nexttime-curtime,interval,movefunc(direction == "left" ? 1 : -1));
+//       //}
+//     }
+//   });
+// });
